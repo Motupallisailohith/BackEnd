@@ -1,0 +1,34 @@
+# .github/workflows/db-backup-ci.yml
+name: DbBackup Solution Build
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'db-backup-cli-live/**' # Trigger on changes within the whole db-backup-cli-live folder
+      - '.github/workflows/db-backup-ci.yml'
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'db-backup-cli-live/**'
+      - '.github/workflows/db-backup-ci.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: '8.0.x' }
+
+      - name: Restore DbBackup Solution Dependencies
+        # This command restores all project dependencies defined in the solution file
+        run: dotnet restore ./db-backup-cli-live/DbBackup.Cli.sln # Adjust 'DbBackup.Cli.sln' to your actual solution file name
+
+      - name: Run DbBackup Solution Tests
+        # This command finds and runs all test projects within the solution
+        run: dotnet test ./db-backup-cli-live/DbBackup.Cli.sln # Adjust to your actual solution file name
+
+      - name: Build DbBackup Solution Release
+        # This command builds all projects in the solution
+        run: dotnet build ./db-backup-cli-live/DbBackup.Cli.sln --configuration Release # Adjust to your actual solution file name
